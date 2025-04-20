@@ -35,11 +35,11 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
     # Configure markdown extensions for better HTML output
     extensions = [
         'extra',  # Adds support for tables, fenced code blocks, etc.
+        'pymdownx.superfences',  # Better fenced code block support
         'codehilite',  # Adds syntax highlighting to code blocks
         'tables',  # Better table support
         'nl2br',  # Convert newlines to <br> tags
         'sane_lists',  # Better list handling
-        'fenced_code',  # Better code block support
         'footnotes',  # Footnote support
         'toc',  # Table of contents support
         'pymdownx.arithmatex',  # LaTeX math support
@@ -48,9 +48,15 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
     # Configure extensions
     extension_configs = {
         'codehilite': {
-            'css_class': 'highlight',
-            'use_pygments': True,
-            'noclasses': False
+            'css_class': 'hljs',
+            'use_pygments': False,
+            'noclasses': True,
+            'guess_lang': True
+        },
+        'pymdownx.superfences': {
+            'css_class': 'hljs',
+            'preserve_tabs': True,
+            'disable_indented_code_blocks': False
         },
         'pymdownx.arithmatex': {
             'generic': True,

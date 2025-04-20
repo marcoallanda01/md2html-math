@@ -54,14 +54,46 @@ def test_images():
     assert "katex" in html.lower()
 
 def test_code_blocks():
-    """Test code block conversion"""
+    """Test code block conversion with language specification"""
     markdown = "```python\ndef hello():\n    print('Hello')\n```"
     html = markdown_to_html(markdown)
-    assert 'class="highlight"' in html
+    assert 'class="hljs"' in html
     assert '<pre>' in html
-    assert '<code>' in html
+    assert '<code' in html
     assert 'print' in html
-    assert "katex" in html.lower()
+    assert "highlight.js" in html.lower()
+
+def test_code_blocks_with_cpp():
+    """Test code block conversion with C++ code"""
+    markdown = '''```cpp
+namespace test {
+    int main() {
+        return 0;
+    }
+}
+```'''
+    html = markdown_to_html(markdown)
+    assert 'class="hljs"' in html
+    assert '<pre>' in html
+    assert '<code' in html
+    assert 'namespace' in html
+    assert "highlight.js" in html.lower()
+
+def test_code_blocks_no_language():
+    """Test code block conversion without language specification"""
+    markdown = "```\nplain text\n```"
+    html = markdown_to_html(markdown)
+    assert '<pre>' in html
+    assert '<code' in html
+    assert 'plain text' in html
+    assert "highlight.js" in html.lower()
+
+def test_inline_code():
+    """Test inline code conversion"""
+    markdown = "Use the `print()` function"
+    html = markdown_to_html(markdown)
+    assert '<code>' in html
+    assert 'print()' in html
 
 def test_blockquotes():
     """Test blockquote conversion"""

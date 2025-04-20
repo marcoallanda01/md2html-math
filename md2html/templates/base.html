@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     
     <!-- Code highlighting CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     
     <style>
         body {
@@ -18,12 +18,35 @@
             padding: 1em;
             max-width: 50em;
             margin: 0 auto;
+            color: #24292e;
+            background-color: #fff;
         }
         pre {
-            padding: 1em;
+            padding: 16px;
             overflow-x: auto;
-            background: #f5f5f5;
-            border-radius: 4px;
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            border: 1px solid #e1e4e8;
+            margin: 1em 0;
+            font-size: 85%;
+            line-height: 1.45;
+        }
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9em;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            background-color: rgba(27,31,35,0.05);
+            border-radius: 3px;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            font-size: 100%;
+            word-break: normal;
+            white-space: pre;
+            border: 0;
         }
         img {
             max-width: 100%;
@@ -31,9 +54,16 @@
         }
         blockquote {
             border-left: 4px solid #ddd;
-            padding-left: 1em;
-            margin-left: 0;
-            color: #666;
+            padding: 0 1em;
+            margin: 0 0 1em;
+            color: #6a737d;
+        }
+        .hljs {
+            display: block;
+            overflow-x: auto;
+            padding: 0;
+            color: #24292e;
+            background: transparent;
         }
     </style>
 </head>
@@ -59,6 +89,19 @@
     
     <!-- Code highlighting JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                // Remove any existing classes that might interfere
+                block.classList.remove('hljs');
+                // Add language class if not present
+                if (!Array.from(block.classList).some(c => c.startsWith('language-'))) {
+                    block.classList.add('language-plaintext');
+                }
+                hljs.highlightElement(block);
+            });
+        });
+    </script>
 </body>
 </html> 
