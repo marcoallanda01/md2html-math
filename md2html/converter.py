@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import jinja2
 import re
+import textwrap
 
 def _get_template():
     """Get the Jinja2 template for HTML output."""
@@ -13,6 +14,55 @@ def _get_template():
         autoescape=True
     )
     return env.get_template('base.html')
+
+def _preprocess_code_blocks(markdown_text: str) -> str:
+    """
+    Preprocess code blocks to ensure proper rendering.
+    Handles both fenced code blocks (```) and inline code blocks (`).
+    """
+    # Fix triple backtick code blocks
+    # This pattern matches triple backticks with optional language specification
+    pattern = r'```(\w*)\n(.*?)```'
+    
+    def replace_code_block(match):
+        lang = match.group(1) or 'plaintext'
+        code = match.group(2)
+        
+        # Dedent the code block while preserving relative indentation
+        code = textwrap.dedent(code)
+        
+        # Ensure each line is properly indented relative to the first line
+        lines = code.split('\n')
+        if lines:
+            # Find the minimum indentation level (excluding empty lines)
+            min_indent = float('inf')
+            for line in lines:
+                if line.strip():  # Skip empty lines
+                    indent = len(line) - len(line.lstrip())
+                    min_indent = min(min_indent, indent)
+            min_indent = 0 if min_indent == float('inf') else min_indent
+            
+            # Adjust indentation while preserving relative levels
+            processed_lines = []
+            for line in lines:
+                if line.strip():  # If line is not empty
+                    # Remove original indentation and add new base indentation
+                    line_content = line[min_indent:] if min_indent < len(line) else line
+                    processed_lines.append(line_content)
+                else:
+                    processed_lines.append(line)  # Keep empty lines as is
+            
+            code = '\n'.join(processed_lines)
+        
+        # Add consistent indentation for the entire block
+        code = textwrap.indent(code, '    ')
+        
+        return f'\n```{lang}\n{code}\n```\n'
+    
+    # Replace all code blocks while preserving language info
+    markdown_text = re.sub(pattern, replace_code_block, markdown_text, flags=re.DOTALL)
+    
+    return markdown_text
 
 def markdown_to_html(markdown_text: Union[str, None]) -> str:
     """
@@ -33,6 +83,9 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
     if not isinstance(markdown_text, str):
         raise ValueError("Input must be a string")
     
+    # Preprocess code blocks
+    markdown_text = _preprocess_code_blocks(markdown_text)
+    
     # Configure markdown extensions for better HTML output
     extensions = [
         'extra',  # Adds support for tables, fenced code blocks, etc.
@@ -52,12 +105,12 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         'codehilite': {
             'css_class': 'hljs',
             'use_pygments': False,
-            'noclasses': True,
-            'guess_lang': True,
-            'linenums': False
+            'noclasses': False,
+            'guess_lang': False
         },
         'pymdownx.superfences': {
-            'disable_indented_code_blocks': True,
+            'disable_indented_code_blocks': False,
+            'preserve_tabs': True,
             'custom_fences': [
                 {
                     'name': 'mermaid',
@@ -83,17 +136,22 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         output_format='html5'
     )
     
-    # Ensure code blocks are properly wrapped with pre and code tags
-    # Fix code blocks that might be missing pre tags
-    code_block_pattern = r'<code([^>]*)>(.*?)</code>'
-    def code_replacer(match):
-        attrs, content = match.groups()
-        # Only wrap in pre if not already wrapped
-        if '<pre' not in content and '</pre>' not in content:
-            return f'<pre><code{attrs}>{content}</code></pre>'
-        return match.group(0)
+    # Post-process code blocks to ensure proper formatting
+    # Handle fenced code blocks with language specification
+    html = re.sub(
+        r'<pre><code\s+class="([^"]+)">(.*?)</code></pre>',
+        lambda m: f'<pre><code class="{m.group(1)}">{m.group(2)}</code></pre>',
+        html,
+        flags=re.DOTALL
+    )
     
-    html = re.sub(code_block_pattern, code_replacer, html, flags=re.DOTALL)
+    # Handle code blocks without language specification
+    html = re.sub(
+        r'<pre><code(?!\s+class=)(.*?)>(.*?)</code></pre>',
+        lambda m: f'<pre><code class="language-plaintext">{m.group(2)}</code></pre>',
+        html,
+        flags=re.DOTALL
+    )
     
     # Wrap in template
     template = _get_template()
