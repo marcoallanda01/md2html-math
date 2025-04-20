@@ -116,7 +116,7 @@ To set up the development environment:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/md2html-math.git
+git clone https://github.com/marcoallanda01/md2html-math.git
 cd md2html-math
 
 # Create and activate a virtual environment
