@@ -6,4 +6,4 @@ python-markdown-math>=0.8
 # Development dependencies
 pytest>=8.0.0
 pytest-cov>=6.0.0 
-pymdownx>=10.0.0
+pymdownx
