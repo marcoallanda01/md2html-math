@@ -56,7 +56,14 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         'pymdownx.superfences': {
             'css_class': 'hljs',
             'preserve_tabs': True,
-            'disable_indented_code_blocks': False
+            'disable_indented_code_blocks': False,
+            'custom_fences': [
+                {
+                    'name': 'mermaid',
+                    'class': 'mermaid',
+                    'format': str
+                }
+            ]
         },
         'pymdownx.arithmatex': {
             'generic': True,
@@ -64,13 +71,19 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         }
     }
     
-    # Convert markdown to HTML
+    # Convert markdown to HTML with proper code block handling
     html = markdown.markdown(
         markdown_text,
         extensions=extensions,
         extension_configs=extension_configs,
         output_format='html5'
     )
+    
+    # Ensure code blocks are properly wrapped
+    html = html.replace('<code>', '<pre><code>')
+    html = html.replace('</code>', '</code></pre>')
+    html = html.replace('<pre><pre>', '<pre>')
+    html = html.replace('</pre></pre>', '</pre>')
     
     # Wrap in template
     template = _get_template()
