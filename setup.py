@@ -8,6 +8,7 @@ setup(
         "markdown>=3.8",
         "jinja2>=3.0.0",
         "python-markdown-math>=0.8",
+        "pymdown-extensions>=10.0.0",
     ],
     extras_require={
         "dev": [

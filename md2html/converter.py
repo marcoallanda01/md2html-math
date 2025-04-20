@@ -42,14 +42,19 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         'fenced_code',  # Better code block support
         'footnotes',  # Footnote support
         'toc',  # Table of contents support
-        'mdx_math',  # LaTeX math support
+        'pymdownx.arithmatex',  # LaTeX math support
     ]
     
-    # Configure math extension
+    # Configure extensions
     extension_configs = {
-        'mdx_math': {
-            'enable_dollar_delimiter': True,
-            'add_preview': True,
+        'codehilite': {
+            'css_class': 'highlight',
+            'use_pygments': True,
+            'noclasses': False
+        },
+        'pymdownx.arithmatex': {
+            'generic': True,
+            'preview': False
         }
     }
     
@@ -75,7 +80,7 @@ def markdown_file_to_html(markdown_file: str, output_file: Union[str, None] = No
     Args:
         markdown_file (str): Path to the markdown file to convert.
         output_file (Union[str, None], optional): Path where to save the HTML output.
-            If None, the output will be returned as a string.
+            If None, the output will be saved with the same name as input but .html extension.
             
     Returns:
         str: The converted HTML string if output_file is None, otherwise an empty string.
@@ -97,13 +102,14 @@ def markdown_file_to_html(markdown_file: str, output_file: Union[str, None] = No
     # Convert to HTML
     html = markdown_to_html(markdown_text)
     
-    # If output file is specified, save the HTML
-    if output_file is not None:
-        if not output_file.lower().endswith('.html'):
-            output_file = f"{output_file}.html"
-        
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(html)
-        return ""
+    # If output file is not specified, use input file name with .html extension
+    if output_file is None:
+        output_file = os.path.splitext(markdown_file)[0] + '.html'
+    elif not output_file.lower().endswith('.html'):
+        output_file = f"{output_file}.html"
+    
+    # Save the HTML
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(html)
     
     return html
