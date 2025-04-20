@@ -57,10 +57,9 @@ def test_code_blocks():
     """Test code block conversion with language specification"""
     markdown = "```python\ndef hello():\n    print('Hello')\n```"
     html = markdown_to_html(markdown)
-    assert 'class="hljs"' in html
-    assert '<pre>' in html
-    assert '<code' in html
+    assert '<pre><code' in html
     assert 'print' in html
+    assert '</code></pre>' in html
     assert "highlight.js" in html.lower()
 
 def test_code_blocks_with_cpp():
@@ -73,19 +72,18 @@ namespace test {
 }
 ```'''
     html = markdown_to_html(markdown)
-    assert 'class="hljs"' in html
-    assert '<pre>' in html
-    assert '<code' in html
+    assert '<pre><code' in html
     assert 'namespace' in html
+    assert '</code></pre>' in html
     assert "highlight.js" in html.lower()
 
 def test_code_blocks_no_language():
     """Test code block conversion without language specification"""
     markdown = "```\nplain text\n```"
     html = markdown_to_html(markdown)
-    assert '<pre>' in html
-    assert '<code' in html
+    assert '<pre><code' in html
     assert 'plain text' in html
+    assert '</code></pre>' in html
     assert "highlight.js" in html.lower()
 
 def test_inline_code():

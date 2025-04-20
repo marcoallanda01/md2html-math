@@ -3,6 +3,7 @@ from typing import Union
 import os
 from pathlib import Path
 import jinja2
+import re
 
 def _get_template():
     """Get the Jinja2 template for HTML output."""
@@ -43,6 +44,7 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         'footnotes',  # Footnote support
         'toc',  # Table of contents support
         'pymdownx.arithmatex',  # LaTeX math support
+        'fenced_code',  # Explicit fenced code support
     ]
     
     # Configure extensions
@@ -51,12 +53,11 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
             'css_class': 'hljs',
             'use_pygments': False,
             'noclasses': True,
-            'guess_lang': True
+            'guess_lang': True,
+            'linenums': False
         },
         'pymdownx.superfences': {
-            'css_class': 'hljs',
-            'preserve_tabs': True,
-            'disable_indented_code_blocks': False,
+            'disable_indented_code_blocks': True,
             'custom_fences': [
                 {
                     'name': 'mermaid',
@@ -64,6 +65,9 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
                     'format': str
                 }
             ]
+        },
+        'fenced_code': {
+            'lang_prefix': 'language-'
         },
         'pymdownx.arithmatex': {
             'generic': True,
@@ -79,11 +83,17 @@ def markdown_to_html(markdown_text: Union[str, None]) -> str:
         output_format='html5'
     )
     
-    # Ensure code blocks are properly wrapped
-    html = html.replace('<code>', '<pre><code>')
-    html = html.replace('</code>', '</code></pre>')
-    html = html.replace('<pre><pre>', '<pre>')
-    html = html.replace('</pre></pre>', '</pre>')
+    # Ensure code blocks are properly wrapped with pre and code tags
+    # Fix code blocks that might be missing pre tags
+    code_block_pattern = r'<code([^>]*)>(.*?)</code>'
+    def code_replacer(match):
+        attrs, content = match.groups()
+        # Only wrap in pre if not already wrapped
+        if '<pre' not in content and '</pre>' not in content:
+            return f'<pre><code{attrs}>{content}</code></pre>'
+        return match.group(0)
+    
+    html = re.sub(code_block_pattern, code_replacer, html, flags=re.DOTALL)
     
     # Wrap in template
     template = _get_template()
